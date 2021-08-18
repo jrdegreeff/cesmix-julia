@@ -1,7 +1,7 @@
 # Integrations with ASEPotential.jl
 
 struct ASEPotentialParameters <: NuclearPotentialParameters
-    element::ElementCoulomb
+    element::ElementCoulomb  # Why? Could be a generic element (it's actually just by accident DFTK returns an ElementCoulomb here. This is only because we don't know better, but this may change in the future)
     lattice::AbstractArray{Quantity, 2}
     parameters::ASEPotential.ASECalculatorParameters
 end
@@ -9,7 +9,7 @@ end
 function forces(state::AtomicConfiguration, parameters::ASEPotentialParameters)
     atoms = ASEAtoms(state, parameters.element, parameters.lattice).atoms
     forces = get_forces(atoms, parameters.parameters)
-    [@SVector [forces[i, 1], forces[i, 2], forces[i, 3]] for i ∈ 1:size(forces)[1]]
+    SVector{3}.(eachrow(forces))
 end
 
 function potential_energy(state::AtomicConfiguration, parameters::ASEPotentialParameters)

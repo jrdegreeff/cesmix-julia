@@ -23,6 +23,7 @@ include("nuclear_potentials/ase_potential_integration.jl")
 export DFTKParameters, dftk_atoms, analyze_convergence
 include("nuclear_potentials/dftk_integration.jl")
 
+# Personally I'm not a fan of long line lengths, but everyone is different.
 export MolecularDynamicsParameters, MolecularDynamicsResult, simulate, get_bodies, get_time_range, plot_temperature, plot_temperature!, plot_energy, plot_energy!, plot_rdf, calculate_rdf
 include("molecular_dynamics/abstractions.jl")
 export NBSParameters, NBSResult

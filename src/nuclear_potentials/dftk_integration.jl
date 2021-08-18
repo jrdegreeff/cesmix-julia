@@ -1,9 +1,10 @@
 # Integrations with DFTK.jl
 
 Base.@kwdef struct DFTKParameters <: NuclearPotentialParameters
+    # Here I would only take a basis and a kwargs object passed to the SCF. That's it.
     psp::ElementPsp
     lattice::AbstractArray{Quantity, 2}
-    Ecut::Quantity
+    Ecut::Quantity   # This is a great example why putting too many types is bad. DFTK is quite flexible wrt. Ecut (integers, floats, unitful, all allowed). By specifying ::Quantity here you *reduce* the flexibility of your interface.
     kgrid::AbstractVector{Integer}
     n_bands::Union{Integer, Nothing} = nothing
     tol::Union{AbstractFloat, Nothing} = nothing
@@ -23,15 +24,17 @@ DFTKParameters(parameters::DFTKParameters, Ecut::Quantity) = DFTKParameters(
 )
 
 function forces(state::AtomicConfiguration, parameters::DFTKParameters)
+    # This is not the generic way you get forces in DFTK, this is specific for one atom only.
     compute_forces_cart(calculate_scf(state, parameters))[1]
 end
 
 function potential_energy(state::AtomicConfiguration, parameters::DFTKParameters)
+    # You should check the SCF is converged. This is not guaranteed.
     calculate_scf(state, parameters).energies.total
 end
 
 function calculate_scf(state::AtomicConfiguration, parameters::DFTKParameters)
-    setup_threading(n_blas=4)
+    setup_threading(n_blas=4)  # This should be done by the user.
     
     state = DFTKAtoms(state, parameters.psp, parameters.lattice)
     model = model_LDA(state.lattice, state.atoms)
@@ -42,6 +45,7 @@ function calculate_scf(state::AtomicConfiguration, parameters::DFTKParameters)
     parameters.previous_scfres[] = scfres
 end
 
+# This does not belong here. Actually this more belongs in DFTK as a utility. Nice idea to have this function, though!
 function analyze_convergence(state::AtomicConfiguration, parameters::DFTKParameters, cutoffs::AbstractVector{<:Quantity})
     energies = Vector{Float64}()
     for Ecut ∈ cutoffs

@@ -1,3 +1,6 @@
+# Generally I'm not a fan of custom exceptions. It adds quite some bloat
+# and in this case, why would that be better than getting a Julia stacktrace?
+#
 # Exceptions
 
 struct UnimplementedError <: Exception
